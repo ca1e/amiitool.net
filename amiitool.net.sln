@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "amiitool.net", "amiitool.net\amiitool.net.csproj", "{15E7A8F0-84A8-48F5-A4A5-D7540798BE3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libamiibo", "libamiibo\libamiibo.csproj", "{8387CC88-00A4-4FA3-9FA4-091806AF5995}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15E7A8F0-84A8-48F5-A4A5-D7540798BE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15E7A8F0-84A8-48F5-A4A5-D7540798BE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15E7A8F0-84A8-48F5-A4A5-D7540798BE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15E7A8F0-84A8-48F5-A4A5-D7540798BE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8387CC88-00A4-4FA3-9FA4-091806AF5995}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8387CC88-00A4-4FA3-9FA4-091806AF5995}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8387CC88-00A4-4FA3-9FA4-091806AF5995}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8387CC88-00A4-4FA3-9FA4-091806AF5995}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42CE7409-E7C9-486C-88D4-F1C56CB2E62E}
+	EndGlobalSection
+EndGlobal
