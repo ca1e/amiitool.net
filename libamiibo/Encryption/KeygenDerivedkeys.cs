@@ -80,7 +80,7 @@ public class KeygenDerivedkeys
     public void Cipher(byte[] input, byte[] output, bool forEncryption)
     {
         var cipher = CipherUtilities.GetCipher("AES/CTR/NoPadding");
-        ParametersWithIV ivAndKey = new ParametersWithIV(new KeyParameter(this.aesKey), this.aesIV);
+        var ivAndKey = new ParametersWithIV(new KeyParameter(this.aesKey), this.aesIV);
         cipher.Init(forEncryption, ivAndKey);
         var pos = cipher.ProcessBytes(input, 0x02C, 0x188, output, 0x02C);
         cipher.DoFinal(output, 0x02C + pos);

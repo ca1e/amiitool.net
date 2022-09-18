@@ -21,7 +21,6 @@
  * THE SOFTWARE.
  */
 
-using System;
 using System.Diagnostics;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Macs;

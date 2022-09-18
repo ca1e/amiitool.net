@@ -1,7 +1,6 @@
 ﻿using LibAmiibo.Data;
-using LibAmiibo.Helper;
-using Org.BouncyCastle.Crypto;
-using System.Linq;
+var data = File.ReadAllBytes("D:\\goblin.bin");
+AmiiboTag.DecryptWithKeys(data);
 
 if (args.Length != 3)
 {

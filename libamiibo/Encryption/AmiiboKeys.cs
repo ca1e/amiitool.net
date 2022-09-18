@@ -68,7 +68,7 @@ namespace LibAmiibo.Encryption
             dataKeys.Cipher(internalBytes, plain, false);
 
             // Init OpenSSL HMAC context
-            HMac hmacCtx = new HMac(new Sha256Digest());
+            var hmacCtx = new HMac(new Sha256Digest());
 
             // Regenerate tag HMAC. Note: order matters, data HMAC depends on tag HMAC!
             hmacCtx.Init(new KeyParameter(tagKeys.hmacKey));
@@ -94,7 +94,7 @@ namespace LibAmiibo.Encryption
             var dataKeys = GenerateKey(this.data, plain);
 
             // Init OpenSSL HMAC context
-            HMac hmacCtx = new HMac(new Sha256Digest());
+            var hmacCtx = new HMac(new Sha256Digest());
 
             // Generate tag HMAC
             hmacCtx.Init(new KeyParameter(tagKeys.hmacKey));
