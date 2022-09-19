@@ -1,6 +1,4 @@
 ﻿using LibAmiibo.Data;
-var data = File.ReadAllBytes("D:\\goblin.bin");
-AmiiboTag.DecryptWithKeys(data);
 
 if (args.Length != 3)
 {

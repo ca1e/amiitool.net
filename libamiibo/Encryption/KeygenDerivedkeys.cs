@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Marcos Vives Del Sol
- * Copyright (C) 2016 Benjamin Krämer
+ * Copyright (C) 2016 Benjamin Krï¿½mer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,6 @@
  */
 
 using LibAmiibo.Helper;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Security;
 
 namespace LibAmiibo.Encryption;
 
@@ -79,11 +77,10 @@ public class KeygenDerivedkeys
 
     public void Cipher(byte[] input, byte[] output, bool forEncryption)
     {
-        var cipher = CipherUtilities.GetCipher("AES/CTR/NoPadding");
-        var ivAndKey = new ParametersWithIV(new KeyParameter(this.aesKey), this.aesIV);
-        cipher.Init(forEncryption, ivAndKey);
-        var pos = cipher.ProcessBytes(input, 0x02C, 0x188, output, 0x02C);
-        cipher.DoFinal(output, 0x02C + pos);
+        using var counterMode = new AesCounterMode(this.aesIV);
+        using var encryptor = counterMode.CreateEncryptor(this.aesKey, null);
+
+        encryptor.TransformBlock(input, 0x02C, 0x188, output, 0x02C);
 
         Array.Copy(input, 0x000, output, 0x000, 0x008);
         // Data signature NOT copied
