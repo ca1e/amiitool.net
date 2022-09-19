@@ -24,11 +24,6 @@ using LibAmiibo.Data.Figurine;
 using LibAmiibo.Data.Settings;
 using LibAmiibo.Encryption;
 using LibAmiibo.Helper;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Sec;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Security;
 
 namespace LibAmiibo.Data;
 
@@ -234,6 +229,7 @@ public class AmiiboTag
         return bcc0In == bcc0Out && bcc1In == bcc1Out & uid[0] == 0x04 && uid[4] != 0x88;
     }
 
+    /*
     public bool IsNtagECDSASignatureValid()
     {
         var uid = UID;
@@ -268,4 +264,5 @@ public class AmiiboTag
             return signer.VerifySignature(ms.ToArray());
         }
     }
+    */
 }

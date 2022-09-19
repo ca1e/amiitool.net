@@ -22,9 +22,7 @@
  */
 
 using System.Diagnostics;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
+using System.Security.Cryptography;
 
 namespace LibAmiibo.Encryption
 {
@@ -33,7 +31,7 @@ namespace LibAmiibo.Encryption
         public const int NFC3D_DRBG_MAX_SEED_SIZE = 480; /* Hardcoded max size in 3DS NFC module */
         public const int NFC3D_DRBG_OUTPUT_SIZE = 32; /* Every iteration generates 32 bytes */
 
-        private readonly HMac hmacCtx;
+        private readonly HMACSHA256 hmacCtx;
         private bool used;
         private ushort iteration;
         private readonly byte[] buffer;
@@ -53,8 +51,7 @@ namespace LibAmiibo.Encryption
             Array.Copy(seed, 0, this.buffer, sizeof(ushort), seedSize);
 
             // Initialize underlying HMAC context
-            this.hmacCtx = new HMac(new Sha256Digest());
-            this.hmacCtx.Init(new KeyParameter(hmacKey));
+            this.hmacCtx = new HMACSHA256(hmacKey);
         }
 
         private void Step(byte[] output, int offset)
@@ -64,7 +61,7 @@ namespace LibAmiibo.Encryption
             if (this.used)
             {
                 // If used at least once, reinitialize the HMAC
-                this.hmacCtx.Reset();
+                this.hmacCtx.Initialize();
             }
             else {
                 this.used = true;
@@ -76,8 +73,8 @@ namespace LibAmiibo.Encryption
             this.iteration++;
 
             // Do HMAC magic
-            this.hmacCtx.BlockUpdate(buffer, 0, buffer.Length);
-            this.hmacCtx.DoFinal(output, offset);
+            var hmdata = this.hmacCtx.ComputeHash(buffer, 0, buffer.Length);
+            Array.Copy(hmdata, 0, output, offset, hmdata.Length);
         }
 
         public static KeygenDerivedkeys GenerateBytes(byte[] hmacKey, byte[] seed, int seedSize)

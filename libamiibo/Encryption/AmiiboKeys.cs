@@ -22,9 +22,7 @@
  */
 
 using LibAmiibo.Helper;
-using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Parameters;
+using System.Security.Cryptography;
 
 namespace LibAmiibo.Encryption
 {
@@ -68,17 +66,16 @@ namespace LibAmiibo.Encryption
             dataKeys.Cipher(internalBytes, plain, false);
 
             // Init OpenSSL HMAC context
-            var hmacCtx = new HMac(new Sha256Digest());
+            var hmac = new HMACSHA256(tagKeys.hmacKey);
 
             // Regenerate tag HMAC. Note: order matters, data HMAC depends on tag HMAC!
-            hmacCtx.Init(new KeyParameter(tagKeys.hmacKey));
-            hmacCtx.BlockUpdate(plain, 0x1D4, 0x34);
-            hmacCtx.DoFinal(plain, HMAC_POS_TAG);
+            var hmdata = hmac.ComputeHash(plain, 0x1D4, 0x34);
+            Array.Copy(hmdata, 0, plain, HMAC_POS_TAG, hmdata.Length);
 
             // Regenerate data HMAC
-            hmacCtx.Init(new KeyParameter(dataKeys.hmacKey));
-            hmacCtx.BlockUpdate(plain, 0x029, 0x1DF);
-            hmacCtx.DoFinal(plain, HMAC_POS_DATA);
+            hmac = new HMACSHA256(dataKeys.hmacKey);
+            hmdata = hmac.ComputeHash(plain, 0x029, 0x1DF);
+            Array.Copy(hmdata, 0, plain, HMAC_POS_DATA, hmdata.Length);
 
             return
                 NativeHelpers.MemCmp(plain, internalBytes, HMAC_POS_DATA, 32) &&
@@ -94,19 +91,18 @@ namespace LibAmiibo.Encryption
             var dataKeys = GenerateKey(this.data, plain);
 
             // Init OpenSSL HMAC context
-            var hmacCtx = new HMac(new Sha256Digest());
+            var hmac = new HMACSHA256(tagKeys.hmacKey);
 
             // Generate tag HMAC
-            hmacCtx.Init(new KeyParameter(tagKeys.hmacKey));
-            hmacCtx.BlockUpdate(plain, 0x1D4, 0x34);
-            hmacCtx.DoFinal(cipher, HMAC_POS_TAG);
+            var hmdata = hmac.ComputeHash(plain, 0x1D4, 0x34);
+            Array.Copy(hmdata, 0, cipher, HMAC_POS_TAG, hmdata.Length);
 
             // Generate data HMAC
-            hmacCtx.Init(new KeyParameter(dataKeys.hmacKey));
-            hmacCtx.BlockUpdate(plain, 0x029, 0x18B);           // Data
-            hmacCtx.BlockUpdate(cipher, HMAC_POS_TAG, 0x20);    // Tag HMAC
-            hmacCtx.BlockUpdate(plain, 0x1D4, 0x34);            // Tag
-            hmacCtx.DoFinal(cipher, HMAC_POS_DATA);
+            hmac = new HMACSHA256(dataKeys.hmacKey);
+            hmac.TransformBlock(plain, 0x029, 0x18B, null, 0);        // Data
+            hmac.TransformBlock(cipher, HMAC_POS_TAG, 0x20, null, 0); // Tag HMAC
+            hmac.TransformFinalBlock(plain, 0x1D4, 0x34);             // Tag
+            Array.Copy(hmac.Hash, 0, cipher, HMAC_POS_DATA, hmac.Hash.Length);
 
             // Encrypt
             dataKeys.Cipher(plain, cipher, true);
