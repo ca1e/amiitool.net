@@ -1,5 +1,7 @@
 ﻿using LibAmiibo.Data;
-
+#if DEBUG
+Generator.Create("0000010000190002");
+#endif
 if (args.Length != 3)
 {
     Console.WriteLine($"Usage: amiitool (-e|-d) <input> <output>");
@@ -10,12 +12,12 @@ string mode = args[0];
 string input = args[1];
 string output = args[2];
 
-if (new FileInfo(input).Length != 540)
+if (File.Exists(input) && new FileInfo(input).Length != 540)
 {
     Console.WriteLine($"Invalid Amiibo data size. must be 540 bytes!");
     return;
 }
-var inputData = File.ReadAllBytes(input);
+var inputData = File.Exists(input) ? File.ReadAllBytes(input) : null;
 
 switch(mode)
 {
@@ -29,6 +31,10 @@ switch(mode)
     case "-d":
         var amiiboTag = AmiiboTag.DecryptWithKeys(inputData);
         File.WriteAllBytes(output, amiiboTag.InternalTag.Array[..540]);
+        break;
+    case "-g":
+        var data = Generator.Create(input);
+        File.WriteAllBytes(output, data[..540]);
         break;
     default:
         Console.WriteLine($"Unknown type: {mode}");
