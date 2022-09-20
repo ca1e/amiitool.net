@@ -4,7 +4,7 @@ using LibAmiibo.Data.Figurine;
 
 public static class Generator
 {
-    public static byte[] Create(string id)
+    public static byte[] Create(string id, string nick = "ca1e", string miiNick = "云浅雪")
     {
         var bytes = new byte[552];
         // Set BCC, Internal, Static Lock, and CC
@@ -19,7 +19,10 @@ public static class Generator
         // Set Keygen Salt
         RandomNumberGenerator.Create().GetBytes(new Span<byte>(bytes, 0x1E8, 0x20));
         var amiiboData = AmiiboTag.FromInternalTag(new ArraySegment<byte>(bytes));
+        // into the soul
         amiiboData.Amiibo = Amiibo.FromStatueId(id);
+        amiiboData.AmiiboSettings.AmiiboUserData.AmiiboNickname = nick;
+        amiiboData.AmiiboSettings.AmiiboUserData.OwnerMii.MiiNickname = miiNick;
         amiiboData.RandomizeUID();
         return amiiboData.EncryptWithKeys();
     }
