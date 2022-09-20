@@ -1,6 +1,10 @@
 ﻿using LibAmiibo.Data;
+using amiitool.net;
+
 #if DEBUG
 Generator.Create("0000010000190002");
+var fakeData = AmiiboTag.FromInternalTag(new ArraySegment<byte>(File.ReadAllBytes(@"D:\malzeno.bin")));
+Console.WriteLine(fakeData.AmiiboSettings.AmiiboUserData.OwnerMii.MiiNickname);
 #endif
 if (args.Length != 3)
 {
@@ -12,11 +16,21 @@ string mode = args[0];
 string input = args[1];
 string output = args[2];
 
-if (File.Exists(input) && new FileInfo(input).Length != 540)
+if(mode != "-g")
 {
-    Console.WriteLine($"Invalid Amiibo data size. must be 540 bytes!");
-    return;
+    if (!File.Exists(input))
+    {
+        Console.WriteLine($"File not found:{input}!");
+        return;
+    }
+    var flen = new FileInfo(input).Length;
+    if (flen != 540 && flen != 532)
+    {
+        Console.WriteLine($"Invalid Amiibo data size. must be 540 bytes!");
+        return;
+    }
 }
+
 var inputData = File.Exists(input) ? File.ReadAllBytes(input) : null;
 
 switch(mode)

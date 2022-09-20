@@ -20,8 +20,6 @@
  * THE SOFTWARE.
  */
 
-using System;
-using System.Collections.Generic;
 using System.Text;
 using LibAmiibo.Data.Settings.UserData.Mii;
 using LibAmiibo.Helper;
