@@ -2,13 +2,7 @@
 using amiitool.net;
 
 #if DEBUG
-using LibAmiibo.Data.Settings.UserData.Mii;
 Generator.Create("0000010000190002");
-var ami = new byte[0x60];
-var iii = File.ReadAllBytes(@"D:\github\amiitool.net\mii\Supper Mario Broth.charinfo");
-Array.Copy(iii, 0, ami, 0x8, iii.Length);
-var mii = new AmiiboMii(new ArraySegment<byte>(ami));
-mii.CheckCRC();
 #endif
 if (args.Length != 3)
 {

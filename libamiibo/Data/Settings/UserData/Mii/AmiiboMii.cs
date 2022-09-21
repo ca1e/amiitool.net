@@ -184,12 +184,11 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
             set { NtagHelpers.UInt16ToTag(MiiBuffer, 0x5E, value); }
         }
 
-        public void CheckCRC()
+        public void CalcCRC()
         {
             var data = new byte[0x5E];
             Array.Copy(MiiBuffer.Array, MiiBuffer.Offset, data, 0, data.Length);
-            var r = CRC16Util.GetCRC16(data);
-            Console.WriteLine($"{r} == {this.CRC16} ?");
+            this.CRC16 = CRC16Util.GetCRC16(data);
         }
 
         public AmiiboMii(ArraySegment<byte> miiData)

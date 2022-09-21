@@ -6,7 +6,7 @@ namespace amiitool.net;
 
 public static class Generator
 {
-    public static byte[] Create(string id, string nick = "云浅雪")
+    public static byte[] Create(string id, string nick = "云浅雪", string miiNick = "云浅雪")
     {
         var bytes = new byte[552];
         Array.Copy(Properties.Resources.tmp, bytes, 540);
@@ -16,6 +16,8 @@ public static class Generator
         // into the soul
         amiiboData.Amiibo = Amiibo.FromStatueId(id);
         amiiboData.AmiiboSettings.AmiiboUserData.AmiiboNickname = nick;
+        amiiboData.AmiiboSettings.AmiiboUserData.OwnerMii.MiiNickname = miiNick;
+        amiiboData.AmiiboSettings.AmiiboUserData.OwnerMii.CalcCRC();
         amiiboData.RandomizeUID();
         return amiiboData.EncryptWithKeys();
     }
