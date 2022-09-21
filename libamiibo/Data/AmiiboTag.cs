@@ -22,8 +22,10 @@
 
 using LibAmiibo.Data.Figurine;
 using LibAmiibo.Data.Settings;
+using LibAmiibo.Data.Settings.AppData;
 using LibAmiibo.Encryption;
 using LibAmiibo.Helper;
+using LibAmiibo.Data.Settings.AppData.Games;
 
 namespace LibAmiibo.Data;
 
@@ -265,4 +267,20 @@ public class AmiiboTag
         }
     }
     */
+
+    public void InitializeAppData<T>() where T: IAppDataInitializer, new()
+    {
+        var factory = new T();
+        var settings = this.AmiiboSettings;
+        var appData = settings.AmiiboAppData;
+
+        appData.AppDataInitializationTitleID = factory.GetInitializationTitleIDs().First();
+        appData.AppID = factory.GetAppID() ?? throw new InvalidOperationException("The AppID was not found");
+        settings.Status |= Status.AppDataInitialized;
+        settings.AmiiboLastModifiedDate = DateTime.UtcNow.Date;
+        settings.WriteCounter++;
+
+        factory.InitializeAppData(this);
+        this.WriteCounter++;
+    }
 }

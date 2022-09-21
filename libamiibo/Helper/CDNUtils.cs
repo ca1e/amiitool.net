@@ -51,6 +51,8 @@ public static class CDNUtils
             metadataUrl = $"https://idbe-ctr.cdn.nintendo.net/icondata/{10}/{titleId}.idbe";
         else if (title.Platform == Platform.WiiU)
             metadataUrl = $"https://idbe-wup.cdn.nintendo.net/icondata/{10}/{titleId}.idbe";
+        //else if (title.Platform == Platform.Switch) // TODO: Not working yet!
+        //    metadataUrl = $"https://idbe-hac.cdn.nintendo.net/icondata/{10}/{titleId}.idbe";
         else
         {
             Console.Error.WriteLine("Wrong platform");
@@ -105,16 +107,16 @@ public static class CDNUtils
             return null;
 
         if (title.Platform == Platform.WiiU)
-		    {
-		        using (var memoryStream = new MemoryStream(iconData))
-		        {
-		            IDBEWiiUContext context = new IDBEWiiUContext();
-		            context.Open(memoryStream);
-		            return context;
-		        }
-		    }
-		    if (title.Platform == Platform.N3DS)
-			{
+        {
+            using (var memoryStream = new MemoryStream(iconData))
+            {
+                IDBEWiiUContext context = new IDBEWiiUContext();
+                context.Open(memoryStream);
+                return context;
+            }
+        }
+        if (title.Platform == Platform.N3DS)
+        {
             // retrieve image (might get used later?)
             using (var memoryStream = new MemoryStream(iconData))
             {
@@ -122,8 +124,8 @@ public static class CDNUtils
                 context.Open(memoryStream);
                 return context;
             }
-			}
+        }
 
-		    return null;
+        return null;
     }
 }

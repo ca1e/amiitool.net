@@ -6,7 +6,7 @@ namespace amiitool.net;
 
 public static class Generator
 {
-    public static byte[] Create(string id, string nick = "��ǳѩ")
+    public static byte[] Create(string id, string nick = "云浅雪")
     {
         var bytes = new byte[552];
         Array.Copy(Properties.Resources.tmp, bytes, 540);
