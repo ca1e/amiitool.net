@@ -25,7 +25,8 @@ using LibAmiibo.Helper;
 
 namespace LibAmiibo.Data.Settings.UserData.Mii
 {
-    // see: https://www.3dbrew.org/wiki/Mii_Maker
+    // https://www.3dbrew.org/wiki/Mii_Maker
+    // https://www.3dbrew.org/wiki/Mii#Mii_format
     public class AmiiboMii
     {
         public ArraySegment<byte> MiiBuffer { get; private set; }
@@ -44,7 +45,6 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
             set { NtagHelpers.UInt64ToTag(MiiBuffer, 0x04, value); }
         }
 
-        /*
         public uint SpecialnessAndDateOfCreation
         {
             get { return NtagHelpers.UInt32FromTag(MiiBuffer, 0x0C); }
@@ -56,7 +56,6 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
             get { return new ArraySegment<byte>(MiiBuffer.Array, MiiBuffer.Offset + 0x10, 0x06); }
             set { CreatorsMAC.CopyFrom(value); }
         }
-        */
 
         public ushort BirthdaySexShirtFavorite
         {
@@ -136,19 +135,13 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
             set { MiiBufferList[0x3B] = value; }
         }
 
+        public ArraySegment<byte> Unknown3CBytes
+        {
+            get { return new ArraySegment<byte>(MiiBuffer.Array, MiiBuffer.Offset + 0x3C, 0x04); }
+            set { Unknown3CBytes.CopyFrom(value); }
+        }
+
         public byte AllowCopying
-        {
-            get { return MiiBufferList[0x3C]; }
-            set { MiiBufferList[0x40] = value; }
-        }
-
-        public ArraySegment<byte> Unknown3DBytes
-        {
-            get { return new ArraySegment<byte>(MiiBuffer.Array, MiiBuffer.Offset + 0x3C, 0x03); }
-            set { Unknown3DBytes.CopyFrom(value); }
-        }
-
-        public byte MiiSharing
         {
             get { return MiiBufferList[0x40]; }
             set { MiiBufferList[0x40] = value; }
@@ -170,12 +163,6 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
         {
             get { return new ArraySegment<byte>(MiiBuffer.Array, MiiBuffer.Offset + 0x48, 0x14); }
             set { AuthorNicknameBuffer.CopyFrom(value); }
-        }
-
-        public ArraySegment<byte> Unknown5CBytes
-        {
-            get { return new ArraySegment<byte>(MiiBuffer.Array, MiiBuffer.Offset + 0x5C, 0x02); }
-            set { Unknown5CBytes.CopyFrom(value); }
         }
 
         public ushort CRC16
