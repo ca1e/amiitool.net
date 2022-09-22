@@ -268,6 +268,19 @@ public class AmiiboTag
     }
     */
 
+    public void InitializeUserData(string nickname)
+    {
+        var settings = this.AmiiboSettings;
+        var userData = settings.AmiiboUserData;
+
+        userData.AmiiboNickname = nickname;
+        userData.AmiiboSetupDate = DateTime.UtcNow.Date;
+        settings.Status |= Status.UserDataInitialized;
+        settings.WriteCounter++;
+
+        this.WriteCounter++;
+    }
+
     public void InitializeAppData<T>() where T: IAppDataInitializer, new()
     {
         var factory = new T();

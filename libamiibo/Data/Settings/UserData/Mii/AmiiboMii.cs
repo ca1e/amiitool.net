@@ -25,18 +25,34 @@ using LibAmiibo.Helper;
 
 namespace LibAmiibo.Data.Settings.UserData.Mii
 {
-    // https://www.3dbrew.org/wiki/Mii_Maker
-    // https://www.3dbrew.org/wiki/Mii#Mii_format
+    // see: https://www.3dbrew.org/wiki/Mii#Mii_format
     public class AmiiboMii
     {
         public ArraySegment<byte> MiiBuffer { get; private set; }
 
         private IList<byte> MiiBufferList => MiiBuffer;
 
-        public uint MiiID
+        // Always 3
+        public byte MiiVersion
         {
-            get { return NtagHelpers.UInt32FromTag(MiiBuffer, 0x00); }
-            set { NtagHelpers.UInt32ToTag(MiiBuffer, 0x00, value); }
+            get { return MiiBufferList[0x0]; }
+            set { MiiBufferList[0x0] = value; }
+        }
+
+        public ushort Unknown01Bytes
+        {
+            get { return NtagHelpers.UInt16FromTag(MiiBuffer, 0x1); }
+            set { NtagHelpers.UInt16ToTag(MiiBuffer, 0x1, value); }
+        }
+
+        /*
+        bit 0-3: ?
+        bit 4-6: Device Mii was originally made on (1=Wii, 2=DS, 3=3DS, 4=Wii U/Switch)
+        */
+        public byte MiiDevice
+        {
+            get { return MiiBufferList[0x3]; }
+            set { MiiBufferList[0x3] = value; }
         }
 
         public ulong SystemID
@@ -45,7 +61,7 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
             set { NtagHelpers.UInt64ToTag(MiiBuffer, 0x04, value); }
         }
 
-        public uint SpecialnessAndDateOfCreation
+        public uint MiiID
         {
             get { return NtagHelpers.UInt32FromTag(MiiBuffer, 0x0C); }
             set { NtagHelpers.UInt32ToTag(MiiBuffer, 0x0C, value); }
@@ -176,6 +192,11 @@ namespace LibAmiibo.Data.Settings.UserData.Mii
             var data = new byte[0x5E];
             Array.Copy(MiiBuffer.Array, MiiBuffer.Offset, data, 0, data.Length);
             this.CRC16 = CRC16Util.GetCRC16(data);
+        }
+
+        public void CopyFrom(ArraySegment<byte> miiData)
+        {
+            this.MiiBuffer.CopyFrom(miiData);
         }
 
         public AmiiboMii(ArraySegment<byte> miiData)
