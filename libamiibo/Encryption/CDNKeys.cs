@@ -22,7 +22,6 @@
  */
 
 using LibAmiibo.Helper;
-using System.IO;
 using System.Security.Cryptography;
 
 namespace LibAmiibo.Encryption;
@@ -35,7 +34,7 @@ public class CDNKeys
     internal static CDNKeys Unserialize(BinaryReader reader)
     {
         byte[] aesIV = reader.ReadBytes(16);
-        List<byte[]> aesKeys = new List<byte[]>();
+        var aesKeys = new List<byte[]>();
         while (reader.PeekChar() != -1)
             aesKeys.Add(reader.ReadBytes(16));
 
