@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using LibAmiibo.Data;
 using LibAmiibo.Data.Figurine;
+using LibAmiibo.Data.Settings.AppData.Games;
 
 namespace amiitool.net;
 
@@ -17,6 +18,7 @@ public static class Generator
         amiiboData.Amiibo = Amiibo.FromStatueId(id);
         amiiboData.AmiiboSettings.AmiiboUserData.AmiiboNickname = nick;
         amiiboData.AmiiboSettings.AmiiboUserData.OwnerMii.MiiNickname = miiNick;
+        amiiboData.InitializeAppData<Splatoon2.Initializer>();
         amiiboData.AmiiboSettings.AmiiboUserData.OwnerMii.CalcCRC();
         amiiboData.RandomizeUID();
         return amiiboData.EncryptWithKeys();
