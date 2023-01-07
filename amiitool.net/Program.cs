@@ -1,9 +1,21 @@
 ﻿using LibAmiibo.Data;
 using amiitool.net;
+using System.Text.Json;
 
 #if DEBUG
-Generator.Create("0000010000190002");
+const string AmiiboAPIURL = "https://www.amiiboapi.com/api/amiibo/";
+var jd = Utils.GetFromURL(AmiiboAPIURL);
+using var jDoc = JsonDocument.Parse(jd);
+foreach(var entry in jDoc.RootElement.GetProperty("amiibo").EnumerateArray())
+{
+    var aminame = entry.GetProperty("name").ToString();
+    var amiid = entry.GetProperty("head").ToString() + entry.GetProperty("tail").ToString();
+    System.Diagnostics.Debug.WriteLine(aminame);
+    //File.WriteAllBytes(amiid + ".bin", Generator.Create(amiid));
+}
+System.Diagnostics.Debug.WriteLine("debug done");
 #endif
+
 if (args.Length != 3)
 {
     Console.WriteLine($"Usage: amiitool (-e|-d) <input> <output>");
