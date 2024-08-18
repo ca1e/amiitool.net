@@ -23,14 +23,41 @@
 using LibAmiibo.Data.Figurine;
 using LibAmiibo.Data.Settings;
 using LibAmiibo.Data.Settings.AppData;
+using LibAmiibo.Data.Settings.AppData.Games;
 using LibAmiibo.Encryption;
 using LibAmiibo.Helper;
-using LibAmiibo.Data.Settings.AppData.Games;
+using System.Text.RegularExpressions;
 
 namespace LibAmiibo.Data;
 
 public class AmiiboTag
 {
+    /// <summary>
+    /// The data placed at the start of a blank NTAG215.
+    /// </summary>
+    private static readonly byte[] tagHeader = new byte[] { 
+        // Tag serial number
+        0x04, 0x01, 0x02, 0x8F, 0x03, 0x04, 0x05, 0x06, 0x04, 
+
+        // Internal value
+        0x48, 
+
+        // Lock bytes
+        0x0F, 0xE0, 
+        
+        // Capability container
+        0xF1, 0x10, 0xFF, 0xEE,
+
+        // Amiibo magic
+        0xA5, 
+
+        // Write counter
+        0x00, 0x00,
+
+        // Figure version (always 0x00)
+        0x00
+    };
+
     /// <summary>
     /// 
     /// This can be an encrypted tag converted with NtagHelpers.GetInternalTag() or an decrypted tag
@@ -151,8 +178,8 @@ public class AmiiboTag
         {
             var bcc0 = (byte)(0x88 ^ value[0] ^ value[1] ^ value[2]);
             var bcc1 = (byte)(value[3] ^ value[4] ^ value[5] ^ value[6]);
-            NtagSerial.CopyFrom(new [] {value[0], value[1], value[2], bcc0, value[3], value[4], value[5], value[6]});
-            LockBytesCC.CopyFrom(new[] {bcc1});
+            NtagSerial.CopyFrom(new[] { value[0], value[1], value[2], bcc0, value[3], value[4], value[5], value[6] });
+            LockBytesCC.CopyFrom(new[] { bcc1 });
         }
     }
 
@@ -191,12 +218,100 @@ public class AmiiboTag
         return new AmiiboTag(data) { IsDecrypted = true };
     }
 
+    /// <summary>
+    /// Creates an AmiiboTag instance from an identification block represented as a hexadecimal string.
+    /// </summary>
+    /// <param name="identificationBlock">The identification block as a hexadecimal string.</param>
+    /// <returns>An AmiiboTag instance representing the identification block.</returns>
+    public static AmiiboTag FromIdentificationBlock(string identificationBlock)
+    {
+        // Create a regular expression object to match a 16-character hexadecimal string..
+        Regex regex = new Regex(@"^(?:0x)?([0-9A-Fa-f]{16})$");
+
+        // Match the input identification block against the regular expression.
+        Match match = regex.Match(identificationBlock);
+
+        if (match.Success)
+        {
+            // The captured group at index 1 contains the hexadecimal value.
+            string hexadecimalValue = match.Groups[1].Value;
+
+            // Call the method to create an AmiiboTag from a byte array.
+            return FromIdentificationBlock(ByteHelpers.StringToByteArray(hexadecimalValue));
+        }
+        else
+        {
+            // The input identification block does not match the expected format.
+            throw new ArgumentException(nameof(identificationBlock));
+        }
+    }
+
+    /// <summary>
+    /// Creates an AmiiboTag instance from an identification block represented as a byte array.
+    /// </summary>
+    /// <param name="identificationBlock">The identification block as a byte array.</param>
+    /// <returns>An AmiiboTag instance representing the identification block.</returns>
+    public static AmiiboTag FromIdentificationBlock(byte[] identificationBlock)
+    {
+        // Check if the identification block byte array is null.
+        if (identificationBlock == null)
+        {
+            throw new ArgumentNullException(nameof(identificationBlock));
+        }
+
+        // Check that the identification block byte array has a length of 8 bytes.
+        if (identificationBlock.Length != 8)
+        {
+            throw new ArgumentOutOfRangeException(nameof(identificationBlock));
+        }
+
+        // Check that the format version of the identification block is equal to 0x02.
+        if (identificationBlock[7] != 0x02)
+        {
+            throw new ArgumentException(nameof(identificationBlock));
+        }
+
+        // Create a new byte array to hold decrypted tag data.
+        var decryptedNtag = new byte[540];
+
+        // Copy the tag header to the byte array.
+        tagHeader.CopyTo(decryptedNtag, 0x00);
+
+        // Copy the identification block to the tag byte array.
+        identificationBlock.CopyTo(decryptedNtag, 0x54);
+
+        // Initialize a new 32-byte array to store a random salt for the tag.
+        var salt = new byte[32];
+
+        // Initialize a random number generator.
+        var rnd = new Random();
+
+        // Fill the salt byte array with random values.
+        rnd.NextBytes(salt);
+
+        // Copy the salt to the tag byte array
+        salt.CopyTo(decryptedNtag, 0x60);
+
+        // Copy the tag footer to the tag byte array.
+        NtagHelpers.CONFIG_BYTES.CopyTo(decryptedNtag, 0x208);
+
+        // Create an AmiiboTag from the decrypted data.
+        var tag = AmiiboTag.FromNtagData(decryptedNtag);
+
+        // Set the IsDecrypted property to true and randomize the UID.
+        tag.IsDecrypted = true;
+        tag.RandomizeUID();
+
+        // Return the tag.
+        return tag;
+    }
+
     public static AmiiboTag DecryptWithKeys(byte[] data)
     {
         byte[] decryptedData = new byte[NtagHelpers.NFC3D_AMIIBO_SIZE];
-        var amiiboKeys = AmiiboKeys.LoadKeys();
+        var amiiboKeys = Keys.AmiiboKeys;
 
-        return amiiboKeys.Unpack(data, decryptedData)
+        return amiiboKeys != null && amiiboKeys.Unpack(data, decryptedData)
             ? FromInternalTag(new ArraySegment<byte>(decryptedData))
             : FromNtagData(data);
     }
@@ -204,7 +319,10 @@ public class AmiiboTag
     public byte[] EncryptWithKeys()
     {
         byte[] encryptedData = new byte[NtagHelpers.NFC3D_NTAG_SIZE];
-        var amiiboKeys = AmiiboKeys.LoadKeys();
+        var amiiboKeys = Keys.AmiiboKeys;
+
+        if (amiiboKeys == null)
+            return null;
 
         amiiboKeys.Pack(this.InternalTag.Array, encryptedData);
         return encryptedData;
@@ -281,7 +399,7 @@ public class AmiiboTag
         this.WriteCounter++;
     }
 
-    public void InitializeAppData<T>() where T: IAppDataInitializer, new()
+    public void InitializeAppData<T>() where T : IAppDataInitializer, new()
     {
         var factory = new T();
         var settings = this.AmiiboSettings;

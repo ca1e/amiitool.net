@@ -28,7 +28,7 @@ using LibAmiibo.Encryption;
 namespace LibAmiibo.Helper;
 
 public static class CDNUtils
-	{
+{
     static CDNUtils()
     {
         // Accept nintendos certificate:
@@ -37,7 +37,7 @@ public static class CDNUtils
 
     public static byte[] DownloadTitleDataStream(Title title)
     {
-        var cdnKeys = CDNKeys.LoadKeys();
+        var cdnKeys = Keys.CDNKeys;
         if (cdnKeys == null)
         {
             Console.Error.WriteLine("CDNKeys missing");

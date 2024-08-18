@@ -49,11 +49,6 @@ namespace LibAmiibo.Encryption
             this.tag.Serialize(writer);
         }
 
-        public static AmiiboKeys LoadKeys()
-        {
-            return Unserialize(new BinaryReader(new MemoryStream(KeyTables.RETAIL)));
-        }
-
         public bool Unpack(byte[] tag, byte[] plain)
         {
             byte[] internalBytes = NtagHelpers.GetInternalTag(tag);
@@ -109,6 +104,39 @@ namespace LibAmiibo.Encryption
 
             // Convert back to hardware
             NtagHelpers.InternalToTag(cipher, tag);
+        }
+
+        public static AmiiboKeys LoadKeys(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return null;
+            }
+
+            using (var stream = new MemoryStream(bytes))
+            {
+                return LoadKeys(stream);
+            }
+        }
+
+        public static AmiiboKeys LoadKeys(Stream stream)
+        {
+            try
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    var result = Unserialize(reader);
+
+                    if ((result.data.magicBytesSize > 16) || (result.tag.magicBytesSize > 16))
+                        return null;
+
+                    return result;
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static byte[] CalcSeed(byte[] dump)

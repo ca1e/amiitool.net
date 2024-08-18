@@ -1,7 +1,6 @@
-﻿namespace LibAmiibo
+﻿namespace LibAmiibo;
+
+public static class Settings
 {
-    public static class Settings
-    {
-        public static string TitleCacheDir { get; set; }
-    }
+    public static string TitleCacheDir { get; set; }
 }

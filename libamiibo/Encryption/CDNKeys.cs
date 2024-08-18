@@ -21,7 +21,9 @@
  * THE SOFTWARE.
  */
 
-using LibAmiibo.Helper;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace LibAmiibo.Encryption;
@@ -30,6 +32,8 @@ public class CDNKeys
 {
     private byte[] aesIV;           // 16 bytes
     private List<byte[]> aesKeys;   // 16 bytes each
+
+    private CDNKeys() { }
 
     internal static CDNKeys Unserialize(BinaryReader reader)
     {
@@ -45,16 +49,23 @@ public class CDNKeys
         };
     }
 
-    public static CDNKeys LoadKeys()
+    public static CDNKeys LoadKeys(byte[] bytes)
     {
-        using (var reader = new BinaryReader(new MemoryStream(KeyTables.CDN)))
+        using (var stream = new MemoryStream(bytes))
+        {
+            return LoadKeys(stream);
+        }
+    }
+
+    public static CDNKeys LoadKeys(Stream stream)
+    {
+        using (var reader = new BinaryReader(stream))
         {
             var result = Unserialize(reader);
 
             if (result.aesKeys.Count < 4)
             {
-                Console.Error.WriteLine("AES count missmatch");
-                return null;
+                throw new Exception("AES count missmatch");
             }
 
             return result;
